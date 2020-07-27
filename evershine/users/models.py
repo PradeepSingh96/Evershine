@@ -2,34 +2,42 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import User
+from datetime import datetime, timezone
+from passlib.hash import pbkdf2_sha256
+
 # Create your models here.
 
 class Organization(models.Model):
     name = models.CharField(max_length=200)
     address = models.CharField(max_length=500)
 
+    def __str__(self):
+        return self.name
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def create_user(self, name, email, password=None):
-
-        if not email:
-            raise ValueError('Users Must Have an email address')
-        user = self.model(name=name, email=email)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+    # def create_user(self, name, email, password=None):
+    #     if not email:
+    #         raise ValueError('Users Must Have an email address')
+    #     user = self.model(name=name, email=email)
+    #     user.set_password(password)
+    #     user.save()
+    #     return user
 
     def create_superuser(self, name, email, password):
 
         if password is None:
             raise TypeError('Superusers must have a password.')
 
-        user = self.create_user(name, email, password)
+        # user = self.create_user(name, email, password)
+        user = self.model(name=name, email=email)
+        user.set_password(password)
         user.is_superuser = True
         user.is_staff = True
-        user.save()
+        user.save(using=self._db)
         return user
 
 
@@ -37,7 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=200)
     email = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=254)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE,default=None, null=True, blank=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, default=None, null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)
 
     is_active = models.BooleanField(default=True)
@@ -49,11 +57,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    def __str__(self):
+        return self.email
+
 
 class Otp(models.Model):
     otp_type = models.CharField(max_length=100)
     otp = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
-
-
