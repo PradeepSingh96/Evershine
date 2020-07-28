@@ -100,7 +100,7 @@ class VerifyOtpSerializer(serializers.Serializer):
                     update_last_login(None, user)
             else:
                 raise serializers.ValidationError(
-                    'Please enter correct otp'
+                    'Please Enter Correct OTP'
                 )
         except User.DoesNotExist:
             raise serializers.ValidationError(
