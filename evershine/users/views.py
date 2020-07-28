@@ -30,3 +30,25 @@ class Otp_verify(APIView):
         return Response(
             {'success': 'True', 'message': 'Verify email successfully', 'token': serializer.data['token'], },
             status=status_code)
+
+
+# Send forget password email
+class Forget_password(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = ForgetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response({'success': 'True', 'message': 'Recovery email sent successfully'}, status=status_code)
+
+
+# Reset Password
+class Reset_password(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = RestPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)

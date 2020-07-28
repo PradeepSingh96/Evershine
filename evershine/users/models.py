@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from datetime import datetime, timezone
 from passlib.hash import pbkdf2_sha256
 
+
 # Create your models here.
 
 class Organization(models.Model):
@@ -28,7 +29,6 @@ class UserManager(BaseUserManager):
     #     return user
 
     def create_superuser(self, name, email, password):
-
         if password is None:
             raise TypeError('Superusers must have a password.')
 
@@ -42,7 +42,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=200)
+    full_name = models.CharField(max_length=200)
     email = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=254)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, default=None, null=True, blank=True)
