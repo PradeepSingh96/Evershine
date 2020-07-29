@@ -66,3 +66,12 @@ class Otp(models.Model):
     otp = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
+
+
+class Projects(models.Model):
+    project_name = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project_owner = models.CharField(max_length=255)
+    status = models.CharField(max_length=255)
+    remark = models.CharField(max_length=555)
+    created_at = models.DateTimeField(auto_now=True)

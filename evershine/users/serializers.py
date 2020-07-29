@@ -9,6 +9,9 @@ from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
 from itsdangerous import URLSafeTimedSerializer
 from django.contrib.auth import authenticate
+import secrets
+import string
+from .models import Projects
 
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -18,7 +21,7 @@ SECRET_KEY = settings.SECRET_KEY
 OTP_EXPIRED = settings.OTP_EXPIRED
 
 
-class UserLoginSerializer(serializers.Serializer):
+class GenerateOtpSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     otp_type = serializers.CharField(max_length=128, write_only=True)
@@ -65,7 +68,7 @@ def generate_otp(user, otp_type):
         return False
 
 
-class VerifyOtpSerializer(serializers.Serializer):
+class UserLoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     otp_type = serializers.CharField(max_length=128, write_only=True)
@@ -121,13 +124,15 @@ class ForgetPasswordSerializer(serializers.Serializer):
             )
         try:
             user = User.objects.filter(email=email).get()
-            # inside link we give frontend baseurl and screen name (like->/reset)
-            link = 'http://' + 'reset/' + generate_confirmation_token(user.email)
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(15))
+            user.set_password(password)
+            user.save()
 
             subject = 'Reset Password'
-            message = ("Hello " + user.full_name + ",\n\nPlease click on the following link to reset your password:\n")
+            message = ("Hello " + user.full_name + ",\n\nThis is your new password:\n\n")
 
-            email_send = send_mail(subject, message + link, EMAIL_HOST_USER, [user.email], fail_silently=False, )
+            email_send = send_mail(subject, message + password, EMAIL_HOST_USER, [user.email], fail_silently=False, )
             if not email_send:
                 raise serializers.ValidationError(
                     'Recovery Email Failed'
@@ -140,41 +145,69 @@ class ForgetPasswordSerializer(serializers.Serializer):
         return {'email': user.email}
 
 
-def generate_confirmation_token(email):
-    serializer = URLSafeTimedSerializer(SECRET_KEY)
-    return serializer.dumps(email)
+# def generate_confirmation_token(email):
+#     serializer = URLSafeTimedSerializer(SECRET_KEY)
+#     return serializer.dumps(email)
+#
+#
+# class RestPasswordSerializer(serializers.Serializer):
+#     token = serializers.CharField(max_length=255)
+#     password = serializers.CharField(max_length=255)
+#
+#     def validate(self, data):
+#         token = data.get("token", None)
+#         password = data.get("password", None)
+#
+#         email = confirm_token(token)
+#         if not email:
+#             raise serializers.ValidationError(
+#                 'Invalid Token'
+#             )
+#         try:
+#             user = User.objects.filter(email=email).get()
+#             user.set_password(password)
+#             user.save()
+#
+#         except User.DoesNotExist:
+#             raise serializers.ValidationError(
+#                 'Password reset failed'
+#             )
+#         return {'email': user.email}
+#
+#
+# def confirm_token(token, expiration=43200):
+#     serializer = URLSafeTimedSerializer(SECRET_KEY)
+#     try:
+#         email = serializer.loads(token, max_age=expiration)
+#     except:
+#         return False
+#     return email
 
 
-class RestPasswordSerializer(serializers.Serializer):
+class AddProjectSerializer(serializers.Serializer):
 
-    token = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=255)
+    project_name = serializers.CharField(max_length=255)
+    status = serializers.CharField(max_length=255)
+    remark = serializers.CharField(max_length=555)
 
     def validate(self, data):
-        token = data.get("token", None)
-        password = data.get("password", None)
 
-        email = confirm_token(token)
-        if not email:
-            raise serializers.ValidationError(
-                'Invalid Token'
-            )
+        project_name = data.get("project_name", None)
+        status = data.get("status", None)
+        remark = data.get("remark", None)
+        request = self.context.get("request")
+        user = request.user
         try:
-            user = User.objects.filter(email=email).get()
-            user.set_password(password)
-            user.save()
-
+            user = User.objects.filter(email=user.email).get()
+            project = Projects(project_name=project_name, status=status, remark=remark, user_id=user.id, project_owner=user.full_name)
+            project.save()
         except User.DoesNotExist:
-            raise serializers.ValidationError(
-                'Password reset failed'
-            )
-        return {'email': user.email}
+            raise serializers.ValidationError('Project not added')
+        return True
 
 
-def confirm_token(token, expiration=43200):
-    serializer = URLSafeTimedSerializer(SECRET_KEY)
-    try:
-        email = serializer.loads(token, max_age=expiration)
-    except:
-        return False
-    return email
+class GetProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Projects
+        fields = '__all__'
+

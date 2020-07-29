@@ -4,27 +4,28 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import *
-from .serializers import UserLoginSerializer
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 
 # Create your views here.
-
-class Login(APIView):
+# Generate Otp
+class Generate_Otp(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
+        serializer = GenerateOtpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
         return Response(
             {'success': 'True', 'message': 'login mail send successfully'}, status=status_code)
 
 
-class Otp_verify(APIView):
+# Login
+class Login(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        serializer = VerifyOtpSerializer(data=request.data)
+        serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
         return Response(
@@ -44,11 +45,34 @@ class Forget_password(APIView):
 
 
 # Reset Password
-class Reset_password(APIView):
+# class Reset_password(APIView):
+#     permission_classes = (AllowAny,)
+#
+#     def post(self, request):
+#         serializer = RestPasswordSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         status_code = status.HTTP_200_OK
+#         return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)
+
+# Get All Projects Details
+class Get_All_Projects(APIView):
     permission_classes = (AllowAny,)
 
+    def get(self, request):
+        user = Projects.objects.all()
+        serializer = GetProjectSerializer(user, many=True)
+        return Response(serializer.data)
+
+
+# Add Project
+class Add_Project(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    # authentication_classes = (JSONWebTokenAuthentication,)
+
     def post(self, request):
-        serializer = RestPasswordSerializer(data=request.data)
+        serializer = AddProjectSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
-        return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)
+        return Response(
+            {'success': 'True', 'message': 'Project add successfully'}, status=status_code)
