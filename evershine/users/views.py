@@ -45,14 +45,14 @@ class Forget_password(APIView):
 
 
 # Reset Password
-# class Reset_password(APIView):
-#     permission_classes = (AllowAny,)
-#
-#     def post(self, request):
-#         serializer = RestPasswordSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         status_code = status.HTTP_200_OK
-#         return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)
+class Reset_password(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = RestPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)
 
 # Get All Projects Details
 class Get_All_Projects(APIView):
