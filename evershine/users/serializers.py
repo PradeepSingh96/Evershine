@@ -25,13 +25,12 @@ class GenerateOtpSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     otp_type = serializers.CharField(max_length=128, write_only=True)
-    project_id = serializers.CharField(max_length=128, write_only=True)
 
     def validate(self, data):
         email = data.get("email", None)
         password = data.get("password", None)
         otp_type = data.get("otp_type", None)
-        project_id = data.get("project_id", None)
+        project_id = None
         # user = User.objects.filter(email=email, password=password).exists()
         user = authenticate(email=email, password=password)
         if not user:
@@ -49,15 +48,35 @@ class GenerateOtpSerializer(serializers.Serializer):
         return {'email': user.email}
 
 
+class ProjectOtpSerializer(serializers.Serializer):
+    otp_type = serializers.CharField(max_length=128, write_only=True)
+    project_id = serializers.CharField(max_length=128, write_only=True)
+
+    def validate(self, data):
+        otp_type = data.get("otp_type", None)
+        project_id = data.get("project_id", None)
+        request = self.context.get("request")
+        user = request.user
+        try:
+            user = User.objects.get(email=user.email)
+            if user:
+                generate_otp(user, otp_type, project_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                'User with given email and password does not exists'
+            )
+        return {'email': user.email}
+
+
 def generate_otp(user, otp_type, project_id):
     # clear all previous otps of a user if present
-    user_otps = Otp.objects.filter(user_id=user.id).all()
-    try:
-        if user_otps:
-            user_otps.delete()
+    user_otps = Otp.objects.filter(user_id=user.id, project_id=project_id).all()
+    if user_otps:
+        user_otps.delete()
+    # otp length is 4 digits random.randint(start,end)
+    otp = str(random.randint(1000, 9999))
 
-        # otp length is 4 digits random.randint(start,end)
-        otp = str(random.randint(1000, 9999))
+    try:
         verification_otp = Otp(user_id=user.id, otp_type=otp_type, otp=otp, project_id=project_id)
         verification_otp.save()
         if otp_type == "verify_email":
@@ -70,8 +89,7 @@ def generate_otp(user, otp_type, project_id):
             send_mail(subject, message, EMAIL_HOST_USER, [user.email], fail_silently=False)
         return True
     except Exception as e:
-        print(e)
-        return False
+        raise serializers.ValidationError(str(e))
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -122,6 +140,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
 
     def validate(self, data):
+
         email = data.get("email", None)
         user = User.objects.filter(email=email).exists()
         if not user:
@@ -219,13 +238,13 @@ class GetProjectSerializer(serializers.ModelSerializer):
 
 
 class DeleteProjectSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=255)
+
     otp_type = serializers.CharField(max_length=128, write_only=True)
     otp = serializers.CharField(max_length=125, write_only=True)
     project_id = serializers.CharField(max_length=255, write_only=True)
 
     def validate(self, data):
-        email = data.get("email", None)
+
         otp_type = data.get("otp_type", None)
         otp = data.get("otp", None)
         project_id = data.get("project_id", None)

@@ -78,6 +78,18 @@ class Add_Project(APIView):
             {'success': 'True', 'message': 'Project add successfully'}, status=status_code)
 
 
+# Project OTP
+class Project_Generate_Otp(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = ProjectOtpSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response(
+            {'success': 'True', 'message': 'Otp send successfully'}, status=status_code)
+
+
 # Delete Project
 class Delete_Project(APIView):
     permission_classes = (IsAuthenticated,)
@@ -95,11 +107,13 @@ class Delete_Project(APIView):
 class Edit_Project(APIView):
     permission_classes = (IsAuthenticated,)
 
-    # authentication_classes = (JSONWebTokenAuthentication,)
-    # def get(self,request):
-    #     user = Projects.objects.filter().get()
-    #     serializer = GetProjectSerializer(user, many=True)
-    #     return Response(serializer.data)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+        data = request.data
+        project = Projects.objects.filter(id=data.get('project_id'), user_id=request.user.id)
+        serializer = GetProjectSerializer(project, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
         serializer = EditProjectSerializer(data=request.data, context={'request': request})
