@@ -10,4 +10,5 @@ urlpatterns = [
     # url(r"^reset/", views.Reset_password.as_view(), name='Reset_password'),
     url(r"^add_project/", views.Add_Project.as_view(), name='Add_Project'),
     url(r"^projects/", views.Get_All_Projects.as_view(), name='Get_All_Projects'),
+    url(r"^delete_project/", views.Delete_Project.as_view(), name='Delete_Project'),
 ]

@@ -28,12 +28,12 @@ class UserManager(BaseUserManager):
     #     user.save()
     #     return user
 
-    def create_superuser(self, name, email, password):
+    def create_superuser(self, full_name, email, password):
         if password is None:
             raise TypeError('Superusers must have a password.')
 
         # user = self.create_user(name, email, password)
-        user = self.model(name=name, email=email)
+        user = self.model(full_name=full_name, email=email)
         user.set_password(password)
         user.is_superuser = True
         user.is_staff = True
@@ -53,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = ['full_name']
 
     objects = UserManager()
 
@@ -61,17 +61,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class Projects(models.Model):
+    project_name = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # User F.K.
+    project_owner = models.CharField(max_length=255)  # User Name
+    status = models.CharField(max_length=255)
+    remark = models.CharField(max_length=555)
+    created_at = models.DateTimeField(auto_now=True)
+
+
 class Otp(models.Model):
     otp_type = models.CharField(max_length=100)
     otp = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True)
-
-
-class Projects(models.Model):
-    project_name = models.CharField(max_length=255)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    project_owner = models.CharField(max_length=255)
-    status = models.CharField(max_length=255)
-    remark = models.CharField(max_length=555)
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE, default=None, null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)

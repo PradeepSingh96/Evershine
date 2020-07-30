@@ -66,8 +66,8 @@ class Get_All_Projects(APIView):
 
 # Add Project
 class Add_Project(APIView):
-
     permission_classes = (IsAuthenticated,)
+
     # authentication_classes = (JSONWebTokenAuthentication,)
 
     def post(self, request):
@@ -76,3 +76,34 @@ class Add_Project(APIView):
         status_code = status.HTTP_200_OK
         return Response(
             {'success': 'True', 'message': 'Project add successfully'}, status=status_code)
+
+
+# Delete Project
+class Delete_Project(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    # authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        serializer = DeleteProjectSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response(
+            {'success': 'True', 'message': 'Project delete successfully'}, status=status_code)
+
+
+class Edit_Project(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    # def get(self,request):
+    #     user = Projects.objects.filter().get()
+    #     serializer = GetProjectSerializer(user, many=True)
+    #     return Response(serializer.data)
+
+    def post(self, request):
+        serializer = EditProjectSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response(
+            {'success': 'True', 'message': 'Project details edited successfully'}, status=status_code)
