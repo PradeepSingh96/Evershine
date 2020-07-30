@@ -87,6 +87,11 @@ def generate_otp(user, otp_type, project_id):
             subject = 'Delete Project'
             message = ("Hello " + user.full_name + ",\n\nPlease use the following otp to delete your project:\n" + otp)
             send_mail(subject, message, EMAIL_HOST_USER, [user.email], fail_silently=False)
+        if otp_type == "edit_project":
+            subject = 'Edit Project'
+            message = (
+                    "Hello " + user.full_name + ",\n\nPlease use the following otp to edit your project details:\n" + otp)
+            send_mail(subject, message, EMAIL_HOST_USER, [user.email], fail_silently=False)
         return True
     except Exception as e:
         raise serializers.ValidationError(str(e))
@@ -238,7 +243,6 @@ class GetProjectSerializer(serializers.ModelSerializer):
 
 
 class DeleteProjectSerializer(serializers.Serializer):
-
     otp_type = serializers.CharField(max_length=128, write_only=True)
     otp = serializers.CharField(max_length=125, write_only=True)
     project_id = serializers.CharField(max_length=255, write_only=True)
@@ -255,13 +259,68 @@ class DeleteProjectSerializer(serializers.Serializer):
             otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp, project_id=project_id).exists()
 
             if otp_verify:
-                otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp, project_id=project_id).get()
+                otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp,
+                                                project_id=project_id).get()
                 # if Otp time is > 30 min Otp Expire
                 if (datetime.now(timezone.utc) - otp_verify.created_at).total_seconds() > OTP_EXPIRED:
                     raise serializers.ValidationError('Otp Expired')
                 else:
-                    project = Projects.objects.filter(id=project_id, user_id = user.id).get()
+                    project = Projects.objects.filter(id=project_id, user_id=user.id).get()
                     project.delete()
+            else:
+                raise serializers.ValidationError(
+                    'Please Enter Correct OTP'
+                )
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                'User with given email and password does not exists'
+            )
+        return True
+
+
+class EditProjectSerializer(serializers.Serializer):
+    otp_type = serializers.CharField(max_length=128, write_only=True)
+    otp = serializers.CharField(max_length=125, write_only=True)
+    project_id = serializers.CharField(max_length=255, write_only=True)
+    project_name = serializers.CharField(max_length=255, write_only=True)
+    status = serializers.CharField(max_length=255, write_only=True)
+    remark = serializers.CharField(max_length=255, write_only=True)
+
+    def validate(self, data):
+
+        otp_type = data.get("otp_type", None)
+        otp = data.get("otp", None)
+        project_id = data.get("project_id", None)
+        project_name = data.get("project_name", None)
+        status = data.get("status", None)
+        remark = data.get("remark", None)
+        request = self.context.get("request")
+        user = request.user
+        try:
+            # user = User.objects.get(email=email)
+            otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp, project_id=project_id).exists()
+
+            if otp_verify:
+                otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp,
+                                                project_id=project_id).get()
+                # if Otp time is > 30 min Otp Expire
+                if (datetime.now(timezone.utc) - otp_verify.created_at).total_seconds() > OTP_EXPIRED:
+                    raise serializers.ValidationError('Otp Expired')
+                else:
+                    project = Projects.objects.filter(id=project_id, user_id=user.id).get()
+                    if project_name == "None":
+                        project_name = project.project_name
+                    if status == "None":
+                        status = project.status
+                    if remark == "None":
+                        remark = project.remark
+
+                    project.project_name = project_name
+                    project.status = status
+                    project.remark = remark
+                    project.user_id = user.id
+                    project.project_owner = user.full_name
+                    project.save()
             else:
                 raise serializers.ValidationError(
                     'Please Enter Correct OTP'
