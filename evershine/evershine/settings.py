@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 CUSTOM_APPS = [
     'users',
     'rest_framework',
+    'corsheaders',
 ]
 
 INSTALLED_APPS += CUSTOM_APPS
