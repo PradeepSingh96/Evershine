@@ -29,6 +29,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
 CUSTOM_APPS = [
     'users',
     'rest_framework',
-    'corsheaders',
+
 ]
 
 INSTALLED_APPS += CUSTOM_APPS
