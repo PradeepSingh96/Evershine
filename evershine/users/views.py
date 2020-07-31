@@ -17,7 +17,8 @@ class Generate_Otp(APIView):
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
         return Response(
-            {'success': 'True', 'message': 'login mail send successfully'}, status=status_code)
+            {'success': 'True', 'message': 'login mail send successfully', 'email': serializer.data['email'],
+             'password': serializer.data['password']}, status=status_code)
 
 
 # Login
@@ -53,6 +54,7 @@ class Reset_password(APIView):
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
         return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)
+
 
 # Get All Projects Details
 class Get_All_Projects(APIView):

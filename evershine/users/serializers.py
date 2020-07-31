@@ -23,7 +23,7 @@ OTP_EXPIRED = settings.OTP_EXPIRED
 
 class GenerateOtpSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=128, write_only=True)
+    password = serializers.CharField(max_length=128)
     otp_type = serializers.CharField(max_length=128, write_only=True)
 
     def validate(self, data):
@@ -45,7 +45,7 @@ class GenerateOtpSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'User with given email and password does not exists'
             )
-        return {'email': user.email}
+        return {'email': user.email, 'password': user.password}
 
 
 class ProjectOtpSerializer(serializers.Serializer):
