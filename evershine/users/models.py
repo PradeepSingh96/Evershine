@@ -67,13 +67,27 @@ class Projects(models.Model):
     project_owner = models.CharField(max_length=255)  # User Name
     status = models.CharField(max_length=255)
     remark = models.CharField(max_length=555)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)  # User F.K.
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)  # only org. related person show all the projects
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class Plants(models.Model):
+    plant_name = models.CharField(max_length=255)
+    size = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    responsible_person = models.CharField(max_length=255)
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE) # Project owner is also a responsible person
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    status = models.CharField(max_length=255)
+    remark = models.CharField(max_length=255)
+    is_simulation = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now=True)
 
 
 class Otp(models.Model):
     otp_type = models.CharField(max_length=100)
     otp = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE, default=None, null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)

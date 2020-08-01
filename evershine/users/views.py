@@ -126,3 +126,17 @@ class Edit_Project(APIView):
         status_code = status.HTTP_200_OK
         return Response(
             {'success': 'True', 'message': 'Project details edited successfully'}, status=status_code)
+
+
+# Add Plants
+class Add_Plant(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    # authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        serializer = AddPlantSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        return Response(
+            {'success': 'True', 'message': 'Project add successfully'}, status=status_code)

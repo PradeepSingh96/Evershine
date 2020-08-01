@@ -11,7 +11,7 @@ from itsdangerous import URLSafeTimedSerializer
 from django.contrib.auth import authenticate
 import secrets
 import string
-from .models import Projects
+from .models import *
 
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -336,4 +336,41 @@ class EditProjectSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'User with given email and password does not exists'
             )
+        return True
+
+
+# Add Plant Serializer
+class AddPlantSerializer(serializers.Serializer):
+    plant_name = serializers.CharField(max_length=255)
+    size = serializers.CharField(max_length=255)
+    location = serializers.CharField(max_length=255)
+    status = serializers.CharField(max_length=255)
+    remark = serializers.CharField(max_length=555)
+    is_simulation = serializers.CharField(max_length=255)
+    project_id = serializers.CharField(max_length=255)
+
+    def validate(self, data):
+
+        plant_name = data.get("plant_name", None)
+        size = data.get("size", None)
+        location = data.get("location", None)
+        project_id = data.get("project_id", None)
+        status = data.get("status", None)
+        remark = data.get("remark", None)
+        is_simulation = data.get("is_simulation", None)
+        request = self.context.get("request")
+        user = request.user
+        try:
+            user = User.objects.filter(email=user.email).get()
+            project = Projects.objects.filter(id=project_id).get()
+            if not project:
+                raise serializers.ValidationError('Please select Project')
+
+            plant = Plants(plant_name=plant_name, size=size, location=location, responsible_person=project.project_owner,
+                           project_id=project.id, status=status, remark=remark,
+                           organization=user.organization, is_simulation=is_simulation)
+            plant.save()
+            print('plant saved', flush=True)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('Plant not added')
         return True
