@@ -67,6 +67,7 @@ class Projects(models.Model):
     project_owner = models.CharField(max_length=255)  # User Name
     status = models.CharField(max_length=255)
     remark = models.CharField(max_length=555)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)  # User F.K.
     created_at = models.DateTimeField(auto_now=True)
 
 

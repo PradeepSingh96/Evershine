@@ -58,11 +58,13 @@ class Reset_password(APIView):
 
 # Get All Projects Details
 class Get_All_Projects(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        user = Projects.objects.all()
-        serializer = GetProjectSerializer(user, many=True)
+        data = request.data
+        # Get all project details related to users organization
+        project = Projects.objects.filter(organization_id=request.user.organization_id)
+        serializer = GetProjectSerializer(project, many=True)
         return Response(serializer.data)
 
 
@@ -89,7 +91,8 @@ class Project_Generate_Otp(APIView):
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
         return Response(
-            {'success': 'True', 'message': 'Otp send successfully'}, status=status_code)
+            {'success': 'True', 'message': 'Otp send successfully', 'project_id': serializer.data['project_id']},
+            status=status_code)
 
 
 # Delete Project

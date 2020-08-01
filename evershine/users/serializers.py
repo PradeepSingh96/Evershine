@@ -50,7 +50,7 @@ class GenerateOtpSerializer(serializers.Serializer):
 
 class ProjectOtpSerializer(serializers.Serializer):
     otp_type = serializers.CharField(max_length=128, write_only=True)
-    project_id = serializers.CharField(max_length=128, write_only=True)
+    project_id = serializers.CharField(max_length=128)
 
     def validate(self, data):
         otp_type = data.get("otp_type", None)
@@ -65,7 +65,7 @@ class ProjectOtpSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'User with given email and password does not exists'
             )
-        return {'email': user.email}
+        return {'email': user.email, 'project_id': project_id}
 
 
 def generate_otp(user, otp_type, project_id):
@@ -236,7 +236,7 @@ class AddProjectSerializer(serializers.Serializer):
         try:
             user = User.objects.filter(email=user.email).get()
             project = Projects(project_name=project_name, status=status, remark=remark, user_id=user.id,
-                               project_owner=user.full_name)
+                               project_owner=user.full_name, organization=user.organization)
             project.save()
         except User.DoesNotExist:
             raise serializers.ValidationError('Project not added')
