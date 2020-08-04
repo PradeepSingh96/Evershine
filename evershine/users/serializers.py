@@ -35,7 +35,7 @@ class GenerateOtpSerializer(serializers.Serializer):
         # user = authenticate(email=email, password=password)
         if not user:
             raise serializers.ValidationError(
-                'A user with this email and password is not found.'
+                'Incorrect email address or password. Please try again.'
             )
         try:
             user = User.objects.get(email=email)
@@ -43,7 +43,7 @@ class GenerateOtpSerializer(serializers.Serializer):
                 generate_otp(user, otp_type, project_id)
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'Incorrect email address or password. Please try again.'
             )
         return {'email': user.email, 'password': user.password}
 
@@ -63,7 +63,7 @@ class ProjectOtpSerializer(serializers.Serializer):
                 generate_otp(user, otp_type, project_id)
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'Incorrect email address or password. Please try again.'
             )
         return {'email': user.email, 'project_id': project_id}
 
@@ -150,7 +150,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
         user = User.objects.filter(email=email).exists()
         if not user:
             raise serializers.ValidationError(
-                'A user with this email is not found.'
+                'Incorrect email address or password. Please try again.'
             )
         try:
             user = User.objects.filter(email=email).get()
@@ -174,7 +174,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
 
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email does not exists'
+                'Incorrect email address or password. Please try again.'
             )
         return {'email': user.email}
 
@@ -284,7 +284,7 @@ class DeleteProjectSerializer(serializers.Serializer):
                 )
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'Incorrect email address or password. Please try again.'
             )
         return True
 
@@ -338,7 +338,7 @@ class EditProjectSerializer(serializers.Serializer):
                 )
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'Incorrect email address or password. Please try again.'
             )
         return True
 
