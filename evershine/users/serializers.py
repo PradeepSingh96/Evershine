@@ -159,6 +159,10 @@ class ForgetPasswordSerializer(serializers.Serializer):
             # user.set_password(password)
             # user.save()
             link = 'http://127.0.0.1:3000/' + 'reset/' + generate_confirmation_token(user.email)
+            if not link:
+                raise serializers.ValidationError(
+                    'The link has expired. Please click on forgot password to generate a new link'
+                )
             subject = 'Reset Password'
             message = ("Hello " + user.full_name + ",\n\nPlease click on the following link to reset your password:\n")
 
