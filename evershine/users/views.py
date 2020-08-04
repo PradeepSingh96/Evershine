@@ -16,6 +16,7 @@ class Generate_Otp(APIView):
         serializer = GenerateOtpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("OTP send Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'login mail send successfully', 'email': serializer.data['email'],
              'password': serializer.data['password']}, status=status_code)
@@ -29,6 +30,7 @@ class Login(APIView):
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("Logged in Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'Verify email successfully', 'token': serializer.data['token'], },
             status=status_code)
@@ -42,6 +44,7 @@ class Forget_password(APIView):
         serializer = ForgetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("mail send Successfully", flush=True)
         return Response({'success': 'True', 'message': 'Recovery email sent successfully'}, status=status_code)
 
 
@@ -53,6 +56,7 @@ class Reset_password(APIView):
         serializer = RestPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("Password Change Successfully", flush=True)
         return Response({'success': 'True', 'message': 'Password change Successfully'}, status=status_code)
 
 
@@ -78,6 +82,7 @@ class Add_Project(APIView):
         serializer = AddProjectSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("Project Added Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'Project add successfully'}, status=status_code)
 
@@ -90,6 +95,7 @@ class Project_Generate_Otp(APIView):
         serializer = ProjectOtpSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("OTP send Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'Otp send successfully', 'project_id': serializer.data['project_id']},
             status=status_code)
@@ -105,6 +111,7 @@ class Delete_Project(APIView):
         serializer = DeleteProjectSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("Project Delete Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'Project delete successfully'}, status=status_code)
 
@@ -124,6 +131,7 @@ class Edit_Project(APIView):
         serializer = EditProjectSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("Project edited Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'Project details edited successfully'}, status=status_code)
 
@@ -138,5 +146,6 @@ class Add_Plant(APIView):
         serializer = AddPlantSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         status_code = status.HTTP_200_OK
+        print("Plant added Successfully", flush=True)
         return Response(
             {'success': 'True', 'message': 'Project add successfully'}, status=status_code)

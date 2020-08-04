@@ -365,8 +365,8 @@ class AddPlantSerializer(serializers.Serializer):
             project = Projects.objects.filter(id=project_id).get()
             if not project:
                 raise serializers.ValidationError('Please select Project')
-
-            plant = Plants(plant_name=plant_name, size=size, location=location, responsible_person=project.project_owner,
+            # responsible_person is Also user who logged in
+            plant = Plants(plant_name=plant_name, size=size, location=location, responsible_person=user.full_name,
                            project_id=project.id, status=status, remark=remark,
                            organization=user.organization, is_simulation=is_simulation)
             plant.save()
