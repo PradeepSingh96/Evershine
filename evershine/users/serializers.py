@@ -216,7 +216,7 @@ class RestPasswordSerializer(serializers.Serializer):
         return {'email': user.email}
 
 
-def confirm_token(token, expiration=43200):
+def confirm_token(token, expiration=120):
     serializer = URLSafeTimedSerializer(SECRET_KEY)
     try:
         email = serializer.loads(token, max_age=expiration)
