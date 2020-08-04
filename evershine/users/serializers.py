@@ -158,7 +158,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
             # password = ''.join(secrets.choice(alphabet) for i in range(15))
             # user.set_password(password)
             # user.save()
-            link = 'localhost:3000/' + 'reset/' + generate_confirmation_token(user.email)
+            link = 'http:127.0.0.1:3000//' + 'reset/' + generate_confirmation_token(user.email)
             subject = 'Reset Password'
             message = ("Hello " + user.full_name + ",\n\nPlease click on the following link to reset your password:\n")
 
