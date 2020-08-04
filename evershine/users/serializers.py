@@ -115,7 +115,7 @@ class UserLoginSerializer(serializers.Serializer):
         # user = authenticate(email=email, password=password)
         if not user:
             raise serializers.ValidationError(
-                'A user with this email and password is not found.'
+                'Incorrect email address or password. Please try again.'
             )
         try:
             user = User.objects.get(email=email)
@@ -136,7 +136,7 @@ class UserLoginSerializer(serializers.Serializer):
                 )
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'Incorrect email address or password. Please try again.'
             )
         return {'email': user.email, 'token': jwt_token, 'password': password}
 
