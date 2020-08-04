@@ -276,6 +276,11 @@ class DeleteProjectSerializer(serializers.Serializer):
                 if (datetime.now(timezone.utc) - otp_verify.created_at).total_seconds() > OTP_EXPIRED:
                     raise serializers.ValidationError('Otp Expired')
                 else:
+                    project = Projects.objects.filter(id=project_id, user_id=user.id).exists()
+                    if not project:
+                        raise serializers.ValidationError(
+                            'Only Project Owner delete the project'
+                        )
                     project = Projects.objects.filter(id=project_id, user_id=user.id).get()
                     project.delete()
             else:
@@ -318,6 +323,11 @@ class EditProjectSerializer(serializers.Serializer):
                 if (datetime.now(timezone.utc) - otp_verify.created_at).total_seconds() > OTP_EXPIRED:
                     raise serializers.ValidationError('Otp Expired')
                 else:
+                    project = Projects.objects.filter(id=project_id, user_id=user.id).exists()
+                    if not project:
+                        raise serializers.ValidationError(
+                            'Only Project Owner Edit the project details'
+                        )
                     project = Projects.objects.filter(id=project_id, user_id=user.id).get()
                     if project_name == "None":
                         project_name = project.project_name
