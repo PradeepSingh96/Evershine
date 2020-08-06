@@ -17,4 +17,7 @@ urlpatterns = [
     url(r"^project_details/", views.Edit_Project.as_view(), name='Edit_Project'),
     # Plants api
     url(r"^add_plant/", views.Add_Plant.as_view(), name='Add_Plant'),
+
+    url(r"^get_plant/", views.Get_Plant.as_view(), name='Add_Plant'),
+    url(r"^get_sub_plant/", views.Get_Sub_Plant.as_view(), name='Get_Sub_Plant'),
 ]

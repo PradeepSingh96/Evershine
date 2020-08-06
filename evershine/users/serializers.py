@@ -355,13 +355,15 @@ class EditProjectSerializer(serializers.Serializer):
 
 # Add Plant Serializer
 class AddPlantSerializer(serializers.Serializer):
-    plant_name = serializers.CharField(max_length=255)
-    size = serializers.CharField(max_length=255)
-    location = serializers.CharField(max_length=255)
-    status = serializers.CharField(max_length=255)
-    remark = serializers.CharField(max_length=555)
-    is_simulation = serializers.CharField(max_length=255)
-    project_id = serializers.CharField(max_length=255)
+    plant_name = serializers.CharField(max_length=255, write_only=True)
+    size = serializers.CharField(max_length=255, write_only=True)
+    location = serializers.CharField(max_length=255, write_only=True)
+    status = serializers.CharField(max_length=255, write_only=True)
+    remark = serializers.CharField(max_length=255, write_only=True)
+    is_simulation = serializers.CharField(max_length=255, write_only=True)
+    project_id = serializers.CharField(max_length=255, write_only=True)
+
+    parent_id = serializers.CharField(max_length=255, write_only=True, default=None)
 
     def validate(self, data):
 
@@ -372,6 +374,7 @@ class AddPlantSerializer(serializers.Serializer):
         status = data.get("status", None)
         remark = data.get("remark", None)
         is_simulation = data.get("is_simulation", None)
+        parent_id = data.get("parent_id", None)
         request = self.context.get("request")
         user = request.user
         try:
@@ -381,10 +384,16 @@ class AddPlantSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Please select Project')
             # responsible_person is Also user who logged in
             plant = Plants(plant_name=plant_name, size=size, location=location, responsible_person=user.full_name,
-                           project_id=project.id, status=status, remark=remark,
-                           organization=user.organization, is_simulation=is_simulation)
+                           project_id=project.id, status=status, remark=remark, user_id=user.id,
+                           organization=user.organization, is_simulation=is_simulation, parent_id=parent_id)
             plant.save()
             print('plant saved', flush=True)
         except User.DoesNotExist:
             raise serializers.ValidationError('Plant not added')
         return True
+
+
+class GetPlantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plants
+        fields = '__all__'

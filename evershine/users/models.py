@@ -67,7 +67,8 @@ class Projects(models.Model):
     project_owner = models.CharField(max_length=255)  # User Name
     status = models.CharField(max_length=255)
     remark = models.CharField(max_length=555)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)  # only org. related person show all the projects
+    organization = models.ForeignKey(Organization,
+                                     on_delete=models.CASCADE)  # only org. related person show all the projects
     created_at = models.DateTimeField(auto_now=True)
 
 
@@ -77,11 +78,12 @@ class Plants(models.Model):
     location = models.CharField(max_length=255)
     responsible_person = models.CharField(max_length=255)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE) # Project owner is also a responsible person
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Project owner is also a responsible person
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     status = models.CharField(max_length=255)
     remark = models.CharField(max_length=255)
     is_simulation = models.CharField(max_length=255)
+    parent_id = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now=True)
 
 

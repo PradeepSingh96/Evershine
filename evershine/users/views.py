@@ -148,4 +148,28 @@ class Add_Plant(APIView):
         status_code = status.HTTP_200_OK
         print("Plant added Successfully", flush=True)
         return Response(
-            {'success': 'True', 'message': 'Project add successfully'}, status=status_code)
+            {'success': 'True', 'message': 'Plant add successfully'}, status=status_code)
+
+
+# Get Plant Details
+class Get_Plant(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        data = request.data
+        print(data)
+        plant = Plants.objects.filter(organization_id=request.user.organization_id, parent_id='None')
+        serializer = GetPlantSerializer(plant, many=True)
+        return Response(serializer.data)
+
+
+class Get_Sub_Plant(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data = request.data
+        print(data)
+        print(request.user)
+        plant = Plants.objects.filter(organization_id=request.user.organization_id, parent_id=request.data.get('parent_id'))
+        serializer = GetPlantSerializer(plant, many=True)
+        return Response(serializer.data)
