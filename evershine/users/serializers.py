@@ -32,6 +32,7 @@ class GenerateOtpSerializer(serializers.Serializer):
         password = data.get("password", None)
         otp_type = data.get("otp_type", None)
         project_id = None
+        plant_id = None
         user = User.objects.filter(email=email, password=password).exists()
         # user = authenticate(email=email, password=password)
         if not user:
@@ -41,7 +42,7 @@ class GenerateOtpSerializer(serializers.Serializer):
         try:
             user = User.objects.get(email=email)
             if user:
-                generate_otp(user, otp_type, project_id)
+                generate_otp(user, otp_type, project_id, plant_id)
         except User.DoesNotExist:
             raise serializers.ValidationError(
                 'Incorrect email address or password. Please try again.'
@@ -59,9 +60,10 @@ class ProjectOtpSerializer(serializers.Serializer):
         request = self.context.get("request")
         user = request.user
         try:
+            plant_id=None
             user = User.objects.get(email=user.email)
             if user:
-                generate_otp(user, otp_type, project_id)
+                generate_otp(user, otp_type, project_id, plant_id)
         except User.DoesNotExist:
             raise serializers.ValidationError(
                 'Incorrect email address or password. Please try again.'
@@ -69,16 +71,38 @@ class ProjectOtpSerializer(serializers.Serializer):
         return {'email': user.email, 'project_id': project_id}
 
 
-def generate_otp(user, otp_type, project_id):
+class PlantOtpSerializer(serializers.Serializer):
+    otp_type = serializers.CharField(max_length=128, write_only=True)
+    project_id = serializers.CharField(max_length=128)
+    plant_id = serializers.CharField(max_length=128)
+
+    def validate(self, data):
+        otp_type = data.get("otp_type", None)
+        project_id = data.get("project_id", None)
+        plant_id = data.get("plant_id", None)
+        request = self.context.get("request")
+        user = request.user
+        try:
+            user = User.objects.get(email=user.email)
+            if user:
+                generate_otp(user, otp_type, project_id, plant_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                'Incorrect email address or password. Please try again.'
+            )
+        return {'email': user.email, 'project_id': project_id, 'plant_id': plant_id}
+
+
+def generate_otp(user, otp_type, project_id, plant_id):
     # clear all previous otps of a user if present
-    user_otps = Otp.objects.filter(user_id=user.id, project_id=project_id).all()
+    user_otps = Otp.objects.filter(user_id=user.id, project_id=project_id, plant_id=plant_id).all()
     if user_otps:
         user_otps.delete()
     # otp length is 4 digits random.randint(start,end)
     otp = str(random.randint(1000, 9999))
 
     try:
-        verification_otp = Otp(user_id=user.id, otp_type=otp_type, otp=otp, project_id=project_id)
+        verification_otp = Otp(user_id=user.id, otp_type=otp_type, otp=otp, project_id=project_id, plant_id=plant_id)
         verification_otp.save()
         if otp_type == "verify_email":
             subject = 'Verify email'
@@ -92,6 +116,10 @@ def generate_otp(user, otp_type, project_id):
             subject = 'Edit Project'
             message = (
                     "Hello " + user.full_name + ",\n\nPlease use the following otp to edit your project details:\n" + otp)
+            send_mail(subject, message, EMAIL_HOST_USER, [user.email], fail_silently=False)
+        if otp_type == "delete_plant":
+            subject = 'Delete Plant'
+            message = ("Hello " + user.full_name + ",\n\nPlease use the following otp to delete your plant:\n" + otp)
             send_mail(subject, message, EMAIL_HOST_USER, [user.email], fail_silently=False)
         return True
     except Exception as e:
@@ -398,3 +426,52 @@ class GetPlantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plants
         fields = '__all__'
+
+
+# Delete Plants
+class DeletePlantSerializer(serializers.Serializer):
+    otp_type = serializers.CharField(max_length=128, write_only=True)
+    otp = serializers.CharField(max_length=125, write_only=True)
+    project_id = serializers.CharField(max_length=255, write_only=True)
+    plant_id = serializers.CharField(max_length=255, write_only=True)
+
+    def validate(self, data):
+
+        otp_type = data.get("otp_type", None)
+        otp = data.get("otp", None)
+        project_id = data.get("project_id", None)
+        plant_id = data.get("plant_id", None)
+        request = self.context.get("request")
+        user = request.user
+        try:
+            # user = User.objects.get(email=email)
+            otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp, plant_id=plant_id, project_id=project_id).exists()
+
+            if otp_verify:
+                otp_verify = Otp.objects.filter(user_id=user.id, otp_type=otp_type, otp=otp,
+                                                plant_id=plant_id, project_id=project_id).get()
+                # if Otp time is > 30 min Otp Expire
+                if (datetime.now(timezone.utc) - otp_verify.created_at).total_seconds() > OTP_EXPIRED:
+                    raise serializers.ValidationError('Otp Expired')
+                else:
+                    sub_plant = Plants.objects.filter(project_id=project_id, parent_id=plant_id).exists()
+                    if sub_plant:
+                        sub_plant = Plants.objects.filter(project_id=project_id, parent_id=plant_id).all()
+                        sub_plant.delete()
+                    plant = Plants.objects.filter(id=plant_id, user_id=user.id, project_id=project_id).exists()
+                    if not plant:
+                        raise serializers.ValidationError(
+                            'Only Plant Owner delete the Plant'
+                        )
+                    plant = Plants.objects.filter(id=plant_id, user_id=user.id, project_id=project_id).get()
+                    plant.delete()
+            else:
+                raise serializers.ValidationError(
+                    'Please Enter Correct OTP'
+                )
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                'Incorrect email address or password. Please try again.'
+            )
+        return True
+

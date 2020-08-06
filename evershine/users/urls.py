@@ -15,9 +15,11 @@ urlpatterns = [
     url(r"^projects/", views.Get_All_Projects.as_view(), name='Get_All_Projects'),
     url(r"^delete_project/", views.Delete_Project.as_view(), name='Delete_Project'),
     url(r"^project_details/", views.Edit_Project.as_view(), name='Edit_Project'),
+    # Plant mail
+    url(r"^plant_mail/", views.Plant_Generate_Otp.as_view(), name='Plant_Generate_Otp'),
     # Plants api
     url(r"^add_plant/", views.Add_Plant.as_view(), name='Add_Plant'),
-
     url(r"^get_plant/", views.Get_Plant.as_view(), name='Add_Plant'),
     url(r"^get_sub_plant/", views.Get_Sub_Plant.as_view(), name='Get_Sub_Plant'),
+    url(r"^delete_plant/", views.Delete_plant.as_view(), name='Delete_plant'),
 ]

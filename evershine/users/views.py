@@ -175,3 +175,30 @@ class Get_Sub_Plant(APIView):
                                       parent_id=request.data.get('parent_id'))
         serializer = GetPlantSerializer(plant, many=True)
         return Response(serializer.data)
+
+
+# Plant OTP
+class Plant_Generate_Otp(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = PlantOtpSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        print("OTP send Successfully", flush=True)
+        return Response(
+            {'success': 'True', 'message': 'Otp send successfully', 'project_id': serializer.data['project_id'],
+             'plant_id': serializer.data['plant_id']}, status=status_code)
+
+
+# Delete Plant
+class Delete_plant(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = DeletePlantSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        status_code = status.HTTP_200_OK
+        print("Plant Delete Successfully", flush=True)
+        return Response(
+            {'success': 'True', 'message': 'Project delete successfully'}, status=status_code)

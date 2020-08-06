@@ -92,4 +92,5 @@ class Otp(models.Model):
     otp = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE, default=None, null=True, blank=True)
+    plant = models.ForeignKey(Plants, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)
