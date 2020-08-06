@@ -19,6 +19,7 @@ JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
 EMAIL_HOST_USER = settings.EMAIL_HOST_USER
 SECRET_KEY = settings.SECRET_KEY
 OTP_EXPIRED = settings.OTP_EXPIRED
+HOST = settings.FRONT_END_URL
 
 
 class GenerateOtpSerializer(serializers.Serializer):
@@ -158,7 +159,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
             # password = ''.join(secrets.choice(alphabet) for i in range(15))
             # user.set_password(password)
             # user.save()
-            link = 'http://127.0.0.1:3000/' + 'reset/' + generate_confirmation_token(user.email)
+            link = 'http://' + HOST + '/reset/' + generate_confirmation_token(user.email)
             if not link:
                 raise serializers.ValidationError(
                     'The link has expired. Please click on forgot password to generate a new link'

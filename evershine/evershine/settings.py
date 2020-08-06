@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from datetime import timedelta
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -147,30 +148,29 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.IsAdminUser',
-        ],
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        )
+    )
 }
-
 
 # Jwt Authentication
 # https://github.com/jpadilla/django-rest-framework-jwt/blob/master/rest_framework_jwt/settings.py
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':
-    'rest_framework_jwt.utils.jwt_encode_handler',
+        'rest_framework_jwt.utils.jwt_encode_handler',
 
     'JWT_DECODE_HANDLER':
-    'rest_framework_jwt.utils.jwt_decode_handler',
+        'rest_framework_jwt.utils.jwt_decode_handler',
 
     'JWT_PAYLOAD_HANDLER':
-    'rest_framework_jwt.utils.jwt_payload_handler',
+        'rest_framework_jwt.utils.jwt_payload_handler',
 
     'JWT_PAYLOAD_GET_USER_ID_HANDLER':
-    'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+        'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
 
     'JWT_RESPONSE_PAYLOAD_HANDLER':
-    'rest_framework_jwt.utils.jwt_response_payload_handler',
+        'rest_framework_jwt.utils.jwt_response_payload_handler',
 
     'JWT_SECRET_KEY': 'SECRET_KEY',
     'JWT_GET_USER_SECRET_KEY': None,
@@ -191,3 +191,5 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': None,
 }
+
+FRONT_END_URL = '127.0.0.1:3000'

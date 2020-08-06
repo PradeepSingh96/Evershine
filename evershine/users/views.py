@@ -163,6 +163,7 @@ class Get_Plant(APIView):
         return Response(serializer.data)
 
 
+# Get Sub Plant Details
 class Get_Sub_Plant(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -170,6 +171,7 @@ class Get_Sub_Plant(APIView):
         data = request.data
         print(data)
         print(request.user)
-        plant = Plants.objects.filter(organization_id=request.user.organization_id, parent_id=request.data.get('parent_id'))
+        plant = Plants.objects.filter(organization_id=request.user.organization_id,
+                                      parent_id=request.data.get('parent_id'))
         serializer = GetPlantSerializer(plant, many=True)
         return Response(serializer.data)
